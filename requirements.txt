@@ -1,1 +1,2 @@
-ansible==6.5.*
+ansible==10.*
+ansible-core==2.16.*  # required for running Python 3.6 on AlmaOS 8
