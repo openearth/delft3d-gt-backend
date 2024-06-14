@@ -91,3 +91,7 @@ dist
 
 # Galaxy role
 roles/Datadog.datadog
+.molecule
+.mypy_cache
+*.pem
+kube.conf

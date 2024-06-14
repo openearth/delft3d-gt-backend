@@ -1,5 +1,12 @@
 ---
 
+- name: Disable system repo
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/plugins/subscription-manager.conf
+    regexp: '^disable_system_repos'
+    line: disable_system_repos = 1
+
+
 - name: Enable RedisDB monitoring
   become: yes
   template:

@@ -21,24 +21,32 @@
       - mc
       - mlocate
       - htop
-      - lynx
-      - nco
       - unzip
-      - libselinux-python
-      - python-setuptools  # added for Ansible 2.7
-      - python-pip
       - tree
+      - python3.8
+      - python3-libselinux
     state: latest
     
+- name: upgrade pip
+  become: yes
+  pip:
+    name:
+      - virtualenv
+      - wheel
+      - pip
+      - selinux
+    extra_args: --upgrade
+    executable: pip3.8
+
 - name: install ntp client
   become: yes
   yum:
-    name: ntp
+    name: chrony
 
 - name: make sure ntpd is started
   become: yes
   service:  
-    name: ntpd.service
+    name: chronyd.service
     state: started
     enabled: yes
 

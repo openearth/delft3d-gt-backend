@@ -3,7 +3,9 @@
   - name: install apache
     become: yes
     yum:
-      name: httpd
+      name: 
+      - httpd
+      - httpd-devel
       state: latest
 
   - name: remove old installation

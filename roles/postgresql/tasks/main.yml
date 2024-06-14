@@ -1,51 +1,24 @@
 # ---
 # tasks file for postgresql
 
-- name: Download pgsql repo rpm file
-  get_url:
-    url: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    dest: /tmp/pgdg-redhat-repo-latest.noarch.rpm 
-
-
-- name: Install pgsql rpm from a local file
-  become: yes
-  yum:
-    name: /tmp/pgdg-redhat-repo-latest.noarch.rpm 
-    state: present
-
 - name: install postgresql
   become: yes
   yum:  
     name:
-      - postgresql12
-      - postgresql12-server
-      - postgresql12-contrib
-      - postgresql12-libs
-      - python-psycopg2
+      - postgresql
+      - postgresql-server
+      - postgresql-server-devel
+      - python38-psycopg2  # for django
+      - python3-psycopg2  # for ansible
     state: present
-
-# - name: install pip psycopg2 client
-#   become: yes
-#   pip:
-#     name: psycopg2-binary
-#     executable: pip2
-
-- name: Add pgsql to $PATH.
-  become: yes
-  copy:
-    dest: /etc/profile.d/pgsql.sh
-    content: "PATH=$PATH:/usr/pgsql-12/bin"
-
-- name: Source pgsql path
-  shell: source /etc/profile.d/pgsql.sh
 
 - name: initialize postgresql db
   become: yes
-  command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  command: postgresql-setup initdb
   notify: restart postgresql
   register: psql_result
   args:
-    creates: /var/lib/pgsql/initdb.log
+    creates: /var/lib/pgsql/initdb_postgresql.log
   failed_when: >
     psql_result.rc != 0 and ("not empty" not in psql_result.stdout)
   changed_when: "psql_result.rc == 0"
@@ -53,20 +26,20 @@
 - name: Install custom pg_hba config
   become: yes
   become_user: postgres
-  template: src=../templates/pg_hba.conf.j2 dest=/var/lib/pgsql/12/data/pg_hba.conf owner=postgres group=postgres mode=0600
+  template: src=../templates/pg_hba.conf.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres group=postgres mode=0600
 
 - name: Listen on all interfaces
   become: yes
   become_user: postgres
   lineinfile:
-    path: /var/lib/pgsql/12/data/postgresql.conf
+    path: /var/lib/pgsql/data/postgresql.conf
     regexp: "listen_addresses ="
     line: "listen_addresses = '*'"
 
 - name: make sure postgres is started
   become: yes
   service:
-    name: postgresql-12
+    name: postgresql
     state: restarted
     enabled: yes
 
